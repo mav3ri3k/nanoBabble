@@ -11,7 +11,7 @@ class Transformer(nnx.Module):
     def __init__(self, cfg: Config, *, rngs: nnx.Rngs):
         self.num_layers = cfg.num_layers
         self.embed = nnx.Embed(cfg.vocab_size, cfg.dim, rngs=rngs)
-        self.pos_embed = nnx.Embed(cfg.seq_len, cfg.dim, rngs=rngs)
+        self.pos_embed = nnx.Embed(cfg.ctx_len, cfg.dim, rngs=rngs)
         self.blocks = nnx.List(
             [
             TransformerBlock(cfg=cfg, layer_id=layer_id, n_layers=cfg.num_layers, rngs=rngs)
@@ -214,9 +214,9 @@ def _resolve_attention_name(cfg: Config, *, layer_id: int, n_layers: int) -> str
     return (cfg.attn if is_global else cfg.attn_local).lower()
 
 
-def _build_causal_mask(seq_len: int, window: int | None) -> jnp.ndarray:
-    q = jnp.arange(seq_len)[:, None]
-    k = jnp.arange(seq_len)[None, :]
+def _build_causal_mask(ctx_len: int, window: int | None) -> jnp.ndarray:
+    q = jnp.arange(ctx_len)[:, None]
+    k = jnp.arange(ctx_len)[None, :]
     mask = k <= q
     if window is not None:
         mask = mask & (k >= (q - window + 1))

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import jax
 import jax.numpy as jnp
 import polars as pl
 
@@ -39,8 +38,8 @@ def load_token_ids(path: str | Path, column: str) -> jnp.ndarray:
     return jnp.asarray(tokens, dtype=jnp.int32)
 
 
-def make_sequences(token_ids: jnp.ndarray, seq_len: int) -> jnp.ndarray:
-    block_size = seq_len + 1
+def make_sequences(token_ids: jnp.ndarray, ctx_len: int) -> jnp.ndarray:
+    block_size = ctx_len + 1
     n_blocks = token_ids.shape[0] // block_size
     if n_blocks == 0:
         raise ValueError(
@@ -48,18 +47,3 @@ def make_sequences(token_ids: jnp.ndarray, seq_len: int) -> jnp.ndarray:
         )
     usable = token_ids[: n_blocks * block_size]
     return usable.reshape((n_blocks, block_size))
-
-
-def batch_iterator(sequences: jnp.ndarray, batch_size: int, seed: int, shuffle: bool = True):
-    if shuffle:
-        key = jax.random.PRNGKey(seed)
-        perm = jax.random.permutation(key, sequences.shape[0])
-        sequences = sequences[perm]
-
-    x = sequences[:, :-1]
-    y = sequences[:, 1:]
-    n_batches = x.shape[0] // batch_size
-    for i in range(n_batches):
-        start = i * batch_size
-        end = start + batch_size
-        yield x[start:end], y[start:end]

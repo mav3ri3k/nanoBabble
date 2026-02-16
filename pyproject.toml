@@ -10,4 +10,9 @@ dependencies = [
     "optax>=0.2.5",
     "orbax-checkpoint>=0.11.0",
     "polars>=1.30.0",
+    "synth-data",
+    "tqdm>=4.67.3",
 ]
+
+[tool.uv.sources]
+synth-data = { path = "../synth_data", editable = true }

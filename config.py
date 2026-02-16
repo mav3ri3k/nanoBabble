@@ -1,23 +1,27 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 import tomllib
+
+from synth import get_synth_config_class
+
+
+SynthConfig = get_synth_config_class()
 
 
 @dataclass
 class Config:
+    data_source: str = "file"
     train_data_path: str = "train.parquet"
     data_column: str = "token_id"
+    synth: SynthConfig = field(default_factory=SynthConfig)
     checkpoint_dir: str = "checkpoints"
-    metrics_dir: str = "metrics"
-    experiments_db: str = "experiments.db"
-    experiment_id: str = "default"
 
     seed: int = 42
     batch_size: int = 16
-    seq_len: int = 128
-    epochs: int = 5
+    ctx_len: int = 128
+    train_steps: int = 1000
     learning_rate: float = 3e-4
     checkpoint_every_steps: int = 500
     log_every_steps: int = 50
@@ -39,7 +43,9 @@ class Config:
     def from_toml(cls, path: str | Path) -> "Config":
         with open(path, "rb") as f:
             raw = tomllib.load(f)
-        return cls(**raw)
+        synth_raw = raw.pop("synth", {})
+        synth = SynthConfig(**synth_raw)
+        return cls(synth=synth, **raw)
 
     def to_dict(self) -> dict:
         return asdict(self)

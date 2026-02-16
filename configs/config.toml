@@ -1,0 +1,49 @@
+data_source = "synth"
+train_data_path = "train.parquet"
+data_column = "token_id"
+checkpoint_dir = "checkpoints"
+
+seed = 42
+batch_size = 1
+ctx_len = 1024
+train_steps = 2
+learning_rate = 0.0003
+checkpoint_every_steps = 20
+log_every_steps = 5
+resume = false
+
+vocab_size = 12000
+dim = 512
+num_heads = 4
+num_layers = 8
+ffn_dim = 512
+
+attn = "mha"
+attn_local = "mha"
+attn_global_every = 0
+swa_window = 128
+mla_latent_dim = 128
+
+[synth]
+dataset = "brevo"
+brevo_N = 90
+brevo_multi = false
+depo_N = 100
+depo_K = 16
+depo_M = 10
+depo_qa = false
+depo_separator = false
+depo_mini_vocab = 3
+depo_min_tlen = 5
+depo_max_tlen = 7
+depo_emit_token_type = false
+mano_L = 10
+mano_ttype = "asm"
+mano_value_mod = 23
+mano_knowledge_augment = true
+lano_config = "data-synthetic-pretrain/Lano-cfg/configs/cfg3f.json"
+lano_bos_token = 9999
+lano_eos_token = 9998
+capo_capo_file = "data-synthetic-pretrain/Capo-bioS-bioR/Capo-bioS-bioR.py"
+capo_fields_dir = "data-synthetic-pretrain/Capo-bioS-bioR/fields"
+capo_order = "random"
