@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import replace
+import numpy as np
 
 from flax import nnx
+import jax
 import jax.numpy as jnp
 import optax
 from tqdm.auto import tqdm
+from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 
 from checkpoint import restore_checkpoint, save_checkpoint
 from config import Config
@@ -15,14 +17,18 @@ from synth import get_synth_batch_iterator
 
 jnp.set_printoptions(threshold=jnp.inf)
 
-
-def _loss(model: Transformer, x_bl: jnp.ndarray, y_bl: jnp.ndarray, label_mask_bl: jnp.ndarray):
+def _loss(model: Transformer, x_bl: jnp.ndarray, y_bl: jnp.ndarray, l_bl: jnp.ndarray):
+    # jax.debug.visualize_array_sharding(x_bl)
+    # print(jax.typeof(x_bl))
     logits_blv = model(x_bl)
+    # print(logits_blv.shape)
+    # print(jax.typeof(logits_blv))
+    # jax.debug.print(logits_blv.sharding)
     loss_bl = optax.losses.softmax_cross_entropy_with_integer_labels(
         logits=logits_blv,
         labels=y_bl,
     )
-    mask_bl = (label_mask_bl == 1).astype(loss_bl.dtype)
+    mask_bl = (l_bl == 1).astype(loss_bl.dtype)
     masked_loss = loss_bl * mask_bl
     denom = jnp.maximum(jnp.sum(mask_bl), 1.0)
     loss = jnp.sum(masked_loss) / denom
@@ -35,10 +41,10 @@ def train_step(
     optimizer: nnx.Optimizer,
     x_bl: jnp.ndarray,
     y_bl: jnp.ndarray,
-    label_mask_bl: jnp.ndarray,
+    l_bl: jnp.ndarray,
 ):
     grad_fn = nnx.value_and_grad(_loss)
-    loss, grads = grad_fn(model, x_bl, y_bl, label_mask_bl)
+    loss, grads = grad_fn(model, x_bl, y_bl, l_bl)
     optimizer.update(model, grads)
     return loss
 
@@ -47,7 +53,14 @@ def train(cfg: Config):
     if cfg.data_source.lower() != "synth":
         raise ValueError("Only `data_source = \"synth\"` is supported.")
 
-    model = Transformer(cfg=cfg, rngs=nnx.Rngs(cfg.seed))
+    if not jax._src.xla_bridge.backends_are_initialized():
+      jax.config.update('jax_num_cpu_devices', 2)
+    print(jax.devices())
+
+    mesh = jax.make_mesh((2,), ('batch',))
+    jax.set_mesh(mesh)
+
+    model = Transformer(cfg=cfg, mesh=mesh, rngs=nnx.Rngs(cfg.seed))
     optimizer = nnx.Optimizer(model, optax.adamw(cfg.learning_rate), wrt=nnx.Param)
 
     restored_step = None
@@ -75,6 +88,10 @@ def train(cfg: Config):
         x_bl = jnp.asarray(x_bl, dtype=jnp.int32)
         l_bl = jnp.asarray(l_bl, dtype=jnp.int32)
         y_bl = jnp.asarray(y_bl, dtype=jnp.int32)
+
+        x_bl = jax.device_put(x_bl, NamedSharding(mesh, P("batch")))
+        y_bl = jax.device_put(y_bl, NamedSharding(mesh, P("batch")))
+        l_bl = jax.device_put(l_bl, NamedSharding(mesh, P("batch")))
 
         loss = train_step(model, optimizer, x_bl, y_bl, l_bl)
         last_loss = float(loss)

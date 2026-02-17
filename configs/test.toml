@@ -3,8 +3,8 @@ train_data_path = "train.parquet"
 data_column = "token_id"
 checkpoint_dir = "checkpoints"
 
-seed = 42
-batch_size = 1
+seed = 69
+batch_size = 2
 ctx_len = 1024
 train_steps = 2
 learning_rate = 0.0003
@@ -15,7 +15,7 @@ resume = false
 vocab_size = 94
 dim = 512
 num_heads = 4
-num_layers = 8
+num_layers = 4
 ffn_dim = 512
 
 attn = "mha"
