@@ -24,9 +24,13 @@ checkpoint_dir = "checkpoints"
 train_steps = 2
 checkpoint_every_steps = 20
 save_checkpoint = true
-log_every_steps = 5
 resume = false
 test = true
+enable_metrics = true
+metrics_db_path = "experiments.db"
+metrics_flush_every = 100
+experiment_name = "test"
+run_description = ""
 
 [synth]
 dataset = "brevo"

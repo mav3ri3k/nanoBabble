@@ -14,8 +14,12 @@ SynthConfig = get_synth_config_class()
 HASH_EXCLUDE_KEYS = {
     "checkpoint_dir",
     "checkpoint_every_steps",
-    "log_every_steps",
+    "enable_metrics",
+    "experiment_name",
+    "metrics_db_path",
+    "metrics_flush_every",
     "resume",
+    "run_description",
     "save_checkpoint",
     "test",
     "train_steps",
@@ -47,9 +51,13 @@ class Config:
     learning_rate: float = 3e-4
     checkpoint_every_steps: int = 500
     save_checkpoint: bool = True
-    log_every_steps: int = 50
     resume: bool = False
     test: bool = False
+    enable_metrics: bool = True
+    metrics_db_path: str = "experiments.db"
+    metrics_flush_every: int = 100
+    experiment_name: str = "default"
+    run_description: str = ""
 
     vocab_size: int = 32000
     dim: int = 256

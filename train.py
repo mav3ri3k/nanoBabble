@@ -14,6 +14,7 @@ from checkpoint import create_checkpoint_manager
 from config import Config
 from model import Transformer
 from synth import get_synth_batch_iterator
+from tracking import create_tracker
 
 jnp.set_printoptions(threshold=jnp.inf)
 
@@ -63,6 +64,7 @@ def train(cfg: Config):
     model = Transformer(cfg=cfg, mesh=mesh, rngs=nnx.Rngs(cfg.seed))
     optimizer = nnx.Optimizer(model, optax.adamw(cfg.learning_rate), wrt=nnx.Param)
     checkpoint_manager = create_checkpoint_manager(cfg)
+    tracker = create_tracker(cfg)
 
     restored_step = None
     if cfg.resume:
@@ -75,39 +77,55 @@ def train(cfg: Config):
 
     tokens_per_step = cfg.batch_size * cfg.ctx_len
     target_steps = max(1, int(cfg.train_steps))
-    log_every = max(1, int(cfg.log_every_steps))
+    report_every = max(1, int(cfg.metrics_flush_every))
     last_loss = 0.0
     progress = tqdm(range(step, target_steps), total=target_steps, initial=step, desc="train")
-    for current_step in progress:
-        x_bl, l_bl, y_bl = synth_batch_iterator(
-            global_seed=cfg.seed,
-            step=current_step,
-            batch_size=cfg.batch_size,
-            ctx_len=cfg.ctx_len,
-            synth_cfg=cfg.synth,
-        )
-        x_bl = jnp.asarray(x_bl, dtype=jnp.int32)
-        l_bl = jnp.asarray(l_bl, dtype=jnp.int32)
-        y_bl = jnp.asarray(y_bl, dtype=jnp.int32)
-
-        x_bl = jax.device_put(x_bl, NamedSharding(mesh, P("batch")))
-        y_bl = jax.device_put(y_bl, NamedSharding(mesh, P("batch")))
-        l_bl = jax.device_put(l_bl, NamedSharding(mesh, P("batch")))
-
-        loss = train_step(model, optimizer, x_bl, y_bl, l_bl)
-        last_loss = float(loss)
-
-        if current_step % log_every == 0:
-            progress.set_postfix(
+    run_status = "completed"
+    run_started = False
+    try:
+        tracker.start_run()
+        run_started = True
+        for current_step in progress:
+            x_bl, l_bl, y_bl = synth_batch_iterator(
+                global_seed=cfg.seed,
                 step=current_step,
-                loss=f"{last_loss:.4f}",
-                tokens_seen=current_step * tokens_per_step,
+                batch_size=cfg.batch_size,
+                ctx_len=cfg.ctx_len,
+                synth_cfg=cfg.synth,
             )
+            x_bl = jnp.asarray(x_bl, dtype=jnp.int32)
+            l_bl = jnp.asarray(l_bl, dtype=jnp.int32)
+            y_bl = jnp.asarray(y_bl, dtype=jnp.int32)
 
-        if current_step > 0 and current_step % cfg.checkpoint_every_steps == 0:
-            ckpt = checkpoint_manager.save(current_step, model, optimizer)
-            if ckpt is not None:
-                progress.write(f"saved checkpoint: {ckpt}")
+            x_bl = jax.device_put(x_bl, NamedSharding(mesh, P("batch")))
+            y_bl = jax.device_put(y_bl, NamedSharding(mesh, P("batch")))
+            l_bl = jax.device_put(l_bl, NamedSharding(mesh, P("batch")))
+
+            loss = train_step(model, optimizer, x_bl, y_bl, l_bl)
+            last_loss = float(loss)
+            tracker.log_loss(current_step, last_loss)
+
+            if current_step % report_every == 0:
+                progress.set_postfix(
+                    step=current_step,
+                    loss=f"{last_loss:.4f}",
+                    tokens_seen=current_step * tokens_per_step,
+                )
+
+            if current_step > 0 and current_step % cfg.checkpoint_every_steps == 0:
+                ckpt = checkpoint_manager.save(current_step, model, optimizer)
+                if ckpt is not None:
+                    progress.write(f"saved checkpoint: {ckpt}")
+    except KeyboardInterrupt:
+        run_status = "killed"
+        raise
+    except Exception:
+        run_status = "failed"
+        raise
+    finally:
+        if run_started:
+            tracker.finish_run(run_status)
+        tracker.close()
 
     final_ckpt = checkpoint_manager.save(target_steps, model, optimizer)
     if final_ckpt is None:
