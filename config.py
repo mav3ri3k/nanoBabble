@@ -1,13 +1,35 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any
 import tomllib
 
 from synth import get_synth_config_class
 
 
 SynthConfig = get_synth_config_class()
+HASH_EXCLUDE_KEYS = {
+    "checkpoint_dir",
+    "checkpoint_every_steps",
+    "log_every_steps",
+    "resume",
+    "save_checkpoint",
+    "test",
+    "train_steps",
+}
+
+
+def _to_plain(value: Any) -> Any:
+    if hasattr(value, "__dataclass_fields__"):
+        return {k: _to_plain(v) for k, v in asdict(value).items()}
+    if isinstance(value, dict):
+        return {str(k): _to_plain(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_to_plain(v) for v in value]
+    return value
 
 
 @dataclass
@@ -24,6 +46,7 @@ class Config:
     train_steps: int = 1000
     learning_rate: float = 3e-4
     checkpoint_every_steps: int = 500
+    save_checkpoint: bool = True
     log_every_steps: int = 50
     resume: bool = False
     test: bool = False
@@ -44,9 +67,31 @@ class Config:
     def from_toml(cls, path: str | Path) -> "Config":
         with open(path, "rb") as f:
             raw = tomllib.load(f)
+        ignore_raw = raw.pop("ignore", {})
+        raw.update(ignore_raw)
         synth_raw = raw.pop("synth", {})
         synth = SynthConfig(**synth_raw)
         return cls(synth=synth, **raw)
 
     def to_dict(self) -> dict:
         return asdict(self)
+
+    def to_plain_dict(self) -> dict[str, Any]:
+        return _to_plain(self)
+
+    def hash_config_dict(self) -> dict[str, Any]:
+        full = self.to_plain_dict()
+        return {k: v for k, v in full.items() if k not in HASH_EXCLUDE_KEYS}
+
+    def config_hash(self) -> str:
+        hash_cfg = self.hash_config_dict()
+        blob = json.dumps(hash_cfg, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return hashlib.sha256(blob).hexdigest()
+
+
+def hash_config_dict(cfg: Config) -> dict[str, Any]:
+    return cfg.hash_config_dict()
+
+
+def config_hash(cfg: Config) -> str:
+    return cfg.config_hash()

@@ -10,7 +10,7 @@ import optax
 from tqdm.auto import tqdm
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 
-from checkpoint import restore_checkpoint, save_checkpoint
+from checkpoint import create_checkpoint_manager
 from config import Config
 from model import Transformer
 from synth import get_synth_batch_iterator
@@ -62,10 +62,11 @@ def train(cfg: Config):
 
     model = Transformer(cfg=cfg, mesh=mesh, rngs=nnx.Rngs(cfg.seed))
     optimizer = nnx.Optimizer(model, optax.adamw(cfg.learning_rate), wrt=nnx.Param)
+    checkpoint_manager = create_checkpoint_manager(cfg)
 
     restored_step = None
     if cfg.resume:
-        restored_step = restore_checkpoint(cfg, model, optimizer)
+        restored_step = checkpoint_manager.restore(model, optimizer)
     step = 0 if restored_step is None else restored_step + 1
     if restored_step is not None:
         print(f"Restored checkpoint from step {restored_step}")
@@ -104,11 +105,15 @@ def train(cfg: Config):
             )
 
         if current_step > 0 and current_step % cfg.checkpoint_every_steps == 0:
-            ckpt = save_checkpoint(cfg, current_step, model, optimizer)
-            progress.write(f"saved checkpoint: {ckpt}")
+            ckpt = checkpoint_manager.save(current_step, model, optimizer)
+            if ckpt is not None:
+                progress.write(f"saved checkpoint: {ckpt}")
 
-    final_ckpt = save_checkpoint(cfg, target_steps, model, optimizer)
-    print(f"training complete. final checkpoint: {final_ckpt} last_loss={last_loss:.4f}")
+    final_ckpt = checkpoint_manager.save(target_steps, model, optimizer)
+    if final_ckpt is None:
+        print(f"training complete. checkpointing disabled. last_loss={last_loss:.4f}")
+    else:
+        print(f"training complete. final checkpoint: {final_ckpt} last_loss={last_loss:.4f}")
 
 
 def main():

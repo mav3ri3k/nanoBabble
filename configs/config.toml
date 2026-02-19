@@ -1,17 +1,11 @@
 data_source = "synth"
 train_data_path = "train.parquet"
 data_column = "token_id"
-checkpoint_dir = "checkpoints"
 
 seed = 42
 batch_size = 1
 ctx_len = 1024
-train_steps = 2
 learning_rate = 0.0003
-checkpoint_every_steps = 20
-log_every_steps = 5
-resume = false
-test = false
 
 vocab_size = 94
 dim = 512
@@ -24,6 +18,15 @@ attn_local = "mha"
 attn_global_every = 0
 swa_window = 128
 mla_latent_dim = 128
+
+[ignore]
+checkpoint_dir = "checkpoints"
+train_steps = 2
+checkpoint_every_steps = 20
+save_checkpoint = true
+log_every_steps = 5
+resume = false
+test = false
 
 [synth]
 dataset = "brevo"
