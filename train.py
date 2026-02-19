@@ -53,9 +53,9 @@ def train(cfg: Config):
     if cfg.data_source.lower() != "synth":
         raise ValueError("Only `data_source = \"synth\"` is supported.")
 
-    if not jax._src.xla_bridge.backends_are_initialized():
-      jax.config.update('jax_num_cpu_devices', 2)
-    print(jax.devices())
+    if cfg.test:
+        jax.config.update('jax_num_cpu_devices', 2)
+        print(jax.devices())
 
     mesh = jax.make_mesh((2,), ('batch',))
     jax.set_mesh(mesh)

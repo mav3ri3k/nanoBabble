@@ -11,6 +11,7 @@ learning_rate = 0.0003
 checkpoint_every_steps = 20
 log_every_steps = 5
 resume = false
+test = false
 
 vocab_size = 94
 dim = 512

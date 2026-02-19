@@ -26,6 +26,7 @@ class Config:
     checkpoint_every_steps: int = 500
     log_every_steps: int = 50
     resume: bool = False
+    test: bool = False
 
     vocab_size: int = 32000
     dim: int = 256
