@@ -1,10 +1,19 @@
 # nanoBabble
 
-Minimal JAX/NNX trainer scaffold with:
+A minimal JAX/NNX trainer scaffold for transformer experiments.
 
-- Transformer model (`mha`, `mla`, `swa` attention backends)
-- Orbax checkpointing
-- Polars-based data loading/batching
+`nanoBabble` is the more mature continuation of earlier model experiments, focused on training pipeline structure and reproducibility.
+
+## What Works Today
+
+- Config-driven training (`.toml`)
+- Transformer model with selectable attention backends:
+  - `mha`
+  - `mla`
+  - `swa`
+- Orbax checkpoint save/restore
+- Synthetic data integration (`synth_data`-based flow)
+- Metric logging to SQLite (`experiments.db`)
 
 ## Train
 
@@ -17,6 +26,18 @@ You can optionally provide TOML config:
 ```bash
 uv run train.py --config configs/config.toml
 ```
+
+For quick testing:
+
+```bash
+uv run main.py --config ./configs/test.toml
+```
+
+## Current Limitations
+
+- Training currently supports only `data_source = "synth"`.
+- Synthetic data path expects external `../synth_data` modules/files.
+- Current training mesh is configured for a 2-device setup in `train.py`.
 
 ## Data Contract
 
@@ -34,3 +55,10 @@ For local `../synth_data` generation, set config fields directly:
 - `mano_L`, `mano_ttype`, `mano_value_mod`, `mano_knowledge_augment`
 - `lano_config`, `lano_bos_token`, `lano_eos_token`
 - `capo_capo_file`, `capo_fields_dir`, `capo_order`
+
+## Roadmap
+
+- Add non-synthetic dataset path for training
+- Expand evaluation/inference utilities
+- Improve multi-device sharding ergonomics
+- Harden experiment tracking and run metadata
