@@ -5,3 +5,4 @@ checkpoints/
 *.db
 *.db-wal
 *.db-shm
+reference_papers/
