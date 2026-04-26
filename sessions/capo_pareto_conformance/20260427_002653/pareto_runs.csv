@@ -1,0 +1,2 @@
+run_name,status,model_name,capo_N,num_params,total_stored_bits,total_max_bits,normalized_capacity,bits_per_param,checkpoint_step,eval_json,error
+conformance_N50000,dry_run,conformance,50000,,,,,,,,

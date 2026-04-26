@@ -73,7 +73,12 @@ class CheckpointManager:
 
         ckpt_path = self._step_path(restore_step)
         try:
-            payload = self._checkpointer.restore(str(ckpt_path))
+            payload_template = {
+                "step": int(restore_step),
+                "model": nnx.state(model),
+                "optimizer": nnx.state(optimizer),
+            }
+            payload = self._checkpointer.restore(str(ckpt_path), item=payload_template)
             nnx.update(model, payload["model"])
             nnx.update(optimizer, payload["optimizer"])
             return int(payload["step"])

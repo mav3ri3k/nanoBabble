@@ -1,0 +1,57 @@
+data_source = "synth"
+train_data_path = "train.parquet"
+data_column = "token_id"
+
+seed = 42
+batch_size = 16
+ctx_len = 1024
+learning_rate = 0.0003
+
+vocab_size = 94
+dim = 512
+num_heads = 4
+num_layers = 8
+ffn_dim = 512
+
+attn = "mha"
+attn_local = "swa"
+attn_global_every = 4
+swa_window = 512
+mla_latent_dim = 128
+
+[ignore]
+checkpoint_dir = "checkpoints"
+train_steps = 2000
+checkpoint_every_steps = 200
+save_checkpoint = true
+resume = false
+test = false
+enable_metrics = true
+metrics_db_path = "experiments.db"
+metrics_flush_every = 100
+experiment_name = "rq1_s3f1"
+run_description = "RQ1 ablation: 3 SWA, 1 full attention"
+
+[synth]
+dataset = "brevo"
+brevo_N = 90
+brevo_multi = false
+depo_N = 100
+depo_K = 16
+depo_M = 10
+depo_qa = false
+depo_separator = false
+depo_mini_vocab = 3
+depo_min_tlen = 5
+depo_max_tlen = 7
+depo_emit_token_type = false
+mano_L = 10
+mano_ttype = "asm"
+mano_value_mod = 23
+mano_knowledge_augment = true
+lano_config = "data-synthetic-pretrain/Lano-cfg/configs/cfg3f.json"
+lano_bos_token = 9999
+lano_eos_token = 9998
+capo_capo_file = "data-synthetic-pretrain/Capo-bioS-bioR/Capo-bioS-bioR.py"
+capo_fields_dir = "data-synthetic-pretrain/Capo-bioS-bioR/fields"
+capo_order = "random"

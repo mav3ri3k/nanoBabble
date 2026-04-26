@@ -1,0 +1,53 @@
+{
+  "base_config": "/Users/apurvamishra/projects/nanoBabble/configs/capo_gpt2_template.toml",
+  "capo_n_values": [
+    50000
+  ],
+  "created_at": "2026-04-27T00:19:23.779371",
+  "model_specs": [
+    {
+      "dim": 64,
+      "ffn_dim": 256,
+      "name": "smoke2",
+      "num_heads": 4,
+      "num_layers": 2
+    }
+  ],
+  "output_root": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913",
+  "pareto_frontier": [
+    {
+      "bits_per_param": 0.0,
+      "capo_N": 50000,
+      "checkpoint_step": 1,
+      "config_path": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/configs/smoke2_N50000.toml",
+      "eval_cmd": "uv run capo_bits_eval.py --config /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/configs/smoke2_N50000.toml --samples 1 --max-new-tokens 2 --seed 42 --synth-root /Users/apurvamishra/projects/synth_data --output-json /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/runs/smoke2_N50000/eval_summary.json",
+      "eval_json": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/runs/smoke2_N50000/eval_summary.json",
+      "model_name": "smoke2",
+      "normalized_capacity": 0.0,
+      "num_params": 3413376,
+      "run_name": "smoke2_N50000",
+      "status": "ok",
+      "total_max_bits": 54.63054266118342,
+      "total_stored_bits": 0.0,
+      "train_cmd": "uv run train.py --config /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/configs/smoke2_N50000.toml"
+    }
+  ],
+  "runs": [
+    {
+      "bits_per_param": 0.0,
+      "capo_N": 50000,
+      "checkpoint_step": 1,
+      "config_path": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/configs/smoke2_N50000.toml",
+      "eval_cmd": "uv run capo_bits_eval.py --config /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/configs/smoke2_N50000.toml --samples 1 --max-new-tokens 2 --seed 42 --synth-root /Users/apurvamishra/projects/synth_data --output-json /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/runs/smoke2_N50000/eval_summary.json",
+      "eval_json": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/runs/smoke2_N50000/eval_summary.json",
+      "model_name": "smoke2",
+      "normalized_capacity": 0.0,
+      "num_params": 3413376,
+      "run_name": "smoke2_N50000",
+      "status": "ok",
+      "total_max_bits": 54.63054266118342,
+      "total_stored_bits": 0.0,
+      "train_cmd": "uv run train.py --config /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001913/configs/smoke2_N50000.toml"
+    }
+  ]
+}

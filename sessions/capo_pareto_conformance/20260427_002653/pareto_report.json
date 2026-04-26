@@ -1,0 +1,29 @@
+{
+  "base_config": "/Users/apurvamishra/projects/nanoBabble/configs/capo_gpt2_template.toml",
+  "capo_n_values": [
+    50000
+  ],
+  "created_at": "2026-04-27T00:26:53.527254",
+  "model_specs": [
+    {
+      "dim": 64,
+      "ffn_dim": 256,
+      "name": "conformance",
+      "num_heads": 4,
+      "num_layers": 2
+    }
+  ],
+  "output_root": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto_conformance/20260427_002653",
+  "pareto_frontier": [],
+  "runs": [
+    {
+      "capo_N": 50000,
+      "config_path": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto_conformance/20260427_002653/configs/conformance_N50000.toml",
+      "eval_cmd": "uv run capo_bits_eval.py --config /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto_conformance/20260427_002653/configs/conformance_N50000.toml --samples 1 --max-new-tokens 24 --seed 42 --synth-root /Users/apurvamishra/projects/synth_data --output-json /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto_conformance/20260427_002653/runs/conformance_N50000/eval_summary.json",
+      "model_name": "conformance",
+      "run_name": "conformance_N50000",
+      "status": "dry_run",
+      "train_cmd": "uv run train.py --config /Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto_conformance/20260427_002653/configs/conformance_N50000.toml"
+    }
+  ]
+}

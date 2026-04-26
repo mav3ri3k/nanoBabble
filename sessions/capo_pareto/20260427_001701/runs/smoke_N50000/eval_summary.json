@@ -1,0 +1,46 @@
+{
+  "bits_per_param": 0.0,
+  "checkpoint_step": null,
+  "config": "/Users/apurvamishra/projects/nanoBabble/sessions/capo_pareto/20260427_001701/configs/smoke_N50000.toml",
+  "normalized_capacity": 0.0,
+  "notes": [
+    "Scaffold metric: approximate bits score using exact/partial QA recall.",
+    "Not equivalent to the full PoLM Capo Pareto frontier protocol."
+  ],
+  "num_params": 3413376,
+  "per_attribute": {
+    "birth_city": {
+      "avg_answer_nll_bits": 15.614448547363281,
+      "avg_stored_bits": 0.0,
+      "exact_match_rate": 0.0
+    },
+    "birth_date": {
+      "avg_answer_nll_bits": 15.632883453369141,
+      "avg_stored_bits": 0.0,
+      "exact_match_rate": 0.0
+    },
+    "employer": {
+      "avg_answer_nll_bits": 15.63265864054362,
+      "avg_stored_bits": 0.0,
+      "exact_match_rate": 0.0
+    },
+    "major": {
+      "avg_answer_nll_bits": 15.625619888305664,
+      "avg_stored_bits": 0.0,
+      "exact_match_rate": 0.0
+    },
+    "university": {
+      "avg_answer_nll_bits": 15.638115692138673,
+      "avg_stored_bits": 0.0,
+      "exact_match_rate": 0.0
+    },
+    "working_city": {
+      "avg_answer_nll_bits": 15.595731735229492,
+      "avg_stored_bits": 0.0,
+      "exact_match_rate": 0.0
+    }
+  },
+  "records": 1,
+  "total_max_bits": 54.63054266118342,
+  "total_stored_bits": 0.0
+}
